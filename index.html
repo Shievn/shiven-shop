@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shiven.shop | Growth Engines</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // TODO: Replace with your specific Firebase Project Config (See instructions below code)
+        const firebaseConfig = {
+  apiKey: "AIzaSyCr7TDGH7YfRmBlDpTIBBM5Iwt6dSidp9o",
+  authDomain: "shiven-shop1.firebaseapp.com",
+  projectId: "shiven-shop1",
+  storageBucket: "shiven-shop1.firebasestorage.app",
+  messagingSenderId: "155943080049",
+  appId: "1:155943080049:web:6947a417becb9a13224bd0"
+};
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const provider = new GoogleAuthProvider();
+
+        // --- Auth Logic ---
+        window.handleGoogleLogin = () => {
+            signInWithPopup(auth, provider)
+                .then((result) => {
+                    const user = result.user;
+                    console.log("Logged in:", user.displayName);
+                    
+                    // Save user to Database (Free Firestore)
+                    saveUserToDB(user);
+                    
+                    updateUIForUser(user);
+                }).catch((error) => {
+                    console.error("Login Failed", error);
+                    alert("Login failed. Check console.");
+                });
+        }
+
+        async function saveUserToDB(user) {
+            try {
+                await setDoc(doc(db, "users", user.uid), {
+                    name: user.displayName,
+                    email: user.email,
+                    lastLogin: serverTimestamp(),
+                    uid: user.uid
+                }, { merge: true }); // Merge prevents overwriting existing data
+            } catch (e) {
+                console.error("Error adding document: ", e);
+            }
+        }
+
+        function updateUIForUser(user) {
+            const loginBtn = document.getElementById('google-login-btn');
+            loginBtn.innerHTML = `<img src="${user.photoURL}" class="w-6 h-6 rounded-full inline mr-2"> ${user.displayName.split(' ')[0]}`;
+            // Auto-fill name in the order form if logged in
+            window.currentUserValidName = user.displayName; 
+        }
+
+        // Check if user is already logged in on load
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                updateUIForUser(user);
+            }
+        });
+    </script>
+
+    <style>
+        :root { --primary: #2563eb; --dark: #0f172a; }
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2, h3, .brand-font { font-family: 'Space Grotesk', sans-serif; }
+        
+        /* Modal Animation */
+        .modal {
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+        .modal.active {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: all;
+        }
+        .modal-content {
+            transform: scale(0.95);
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .modal.active .modal-content {
+            transform: scale(1);
+        }
+
+        /* Abstract BG */
+        .bg-grid {
+            background-image: linear-gradient(rgba(37,99,235,0.05) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(37,99,235,0.05) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+    </style>
+</head>
+<body class="bg-white text-slate-900 overflow-x-hidden">
+
+    <nav class="fixed w-full z-40 top-0 bg-white/90 backdrop-blur border-b border-gray-100">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <img src="26649.png" alt="Shiven.shop Logo" class="w-10 h-10 object-contain rounded-full shadow-lg">
+                <span class="text-xl font-bold brand-font tracking-tight">shiven.shop</span>
+            </div>
+            
+            <div class="flex items-center gap-4">
+                <span class="hidden md:block text-xs font-mono text-gray-400" id="nav-order-id">ID: GEN...</span>
+                <button id="google-login-btn" onclick="window.handleGoogleLogin()" class="px-4 py-2 text-sm font-medium border border-gray-200 rounded-lg hover:bg-gray-50 flex items-center gap-2 transition-all">
+                    <i class="ph-fill ph-google-logo text-blue-600"></i> <span class="hidden sm:inline">Sign In</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <section class="relative pt-32 pb-20 lg:pt-48 overflow-hidden">
+        <div class="absolute inset-0 bg-grid -z-10"></div>
+        <div class="max-w-7xl mx-auto px-6 text-center">
+            <h1 class="text-5xl md:text-7xl font-bold mb-6 tracking-tight">
+                Websites Built to <br/><span class="text-blue-600">Scale Your Business</span>
+            </h1>
+            <p class="text-lg text-slate-500 max-w-2xl mx-auto mb-10">
+                Premium design, Google authentication, and scalable databases. 
+                Everything you need to grow online.
+            </p>
+            <div class="flex justify-center gap-4">
+                <button onclick="openServiceModal('General Consultation')" class="bg-blue-600 text-white px-8 py-4 rounded-xl font-bold hover:bg-blue-700 transition-all flex items-center gap-2">
+                    <i class="ph-fill ph-whatsapp-logo text-xl"></i> Start Project Now
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-20 bg-slate-50" id="services">
+        <div class="max-w-7xl mx-auto px-6">
+            <h2 class="text-3xl font-bold mb-12 text-center">Select Your Industry</h2>
+            
+            <div class="grid md:grid-cols-3 gap-8">
+                
+                <div onclick="openServiceModal('Business Corporate')" class="bg-white p-6 rounded-2xl border border-gray-200 hover:border-blue-600 hover:shadow-xl cursor-pointer transition-all group">
+                    <div class="h-12 w-12 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600 text-2xl mb-4 group-hover:scale-110 transition-transform">
+                        <i class="ph ph-briefcase"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">Corporate & Business</h3>
+                    <p class="text-sm text-slate-500 mb-4">Click to view plans for Agencies, Startups, and Firms.</p>
+                    <span class="text-blue-600 text-sm font-semibold flex items-center gap-1">View Pricing <i class="ph-bold ph-arrow-right"></i></span>
+                </div>
+
+                <div onclick="openServiceModal('Cafe & Restaurant')" class="bg-white p-6 rounded-2xl border border-gray-200 hover:border-orange-500 hover:shadow-xl cursor-pointer transition-all group">
+                    <div class="h-12 w-12 bg-orange-100 rounded-lg flex items-center justify-center text-orange-600 text-2xl mb-4 group-hover:scale-110 transition-transform">
+                        <i class="ph ph-coffee"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">Café & Restaurant</h3>
+                    <p class="text-sm text-slate-500 mb-4">Click to view plans for Menus, Bookings, and Food Service.</p>
+                    <span class="text-orange-600 text-sm font-semibold flex items-center gap-1">View Pricing <i class="ph-bold ph-arrow-right"></i></span>
+                </div>
+
+                <div onclick="openServiceModal('E-Commerce Store')" class="bg-white p-6 rounded-2xl border border-gray-200 hover:border-purple-600 hover:shadow-xl cursor-pointer transition-all group">
+                    <div class="h-12 w-12 bg-purple-100 rounded-lg flex items-center justify-center text-purple-600 text-2xl mb-4 group-hover:scale-110 transition-transform">
+                        <i class="ph ph-shopping-cart"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">E-Commerce Store</h3>
+                    <p class="text-sm text-slate-500 mb-4">Click to view plans for Online Selling and Inventories.</p>
+                    <span class="text-purple-600 text-sm font-semibold flex items-center gap-1">View Pricing <i class="ph-bold ph-arrow-right"></i></span>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <footer class="bg-slate-900 text-slate-400 py-12 text-center">
+        <img src="26649.png" alt="Logo" class="w-12 h-12 mx-auto mb-4 opacity-80 rounded-full">
+        <p class="text-sm">&copy; 2026 shiven.shop</p>
+    </footer>
+
+    <div id="pricingModal" class="modal fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+        <div class="modal-content bg-white w-full max-w-2xl rounded-3xl p-6 md:p-8 shadow-2xl relative">
+            <button onclick="closeModals()" class="absolute top-4 right-4 text-slate-400 hover:text-red-500"><i class="ph ph-x text-2xl"></i></button>
+            
+            <h3 class="text-2xl font-bold mb-2" id="modalTitle">Select Plan</h3>
+            <p class="text-slate-500 mb-6 text-sm">Choose the tier that fits your growth stage.</p>
+
+            <div class="grid md:grid-cols-3 gap-4">
+                <div onclick="selectPlan('Basic', 400)" class="border border-gray-200 rounded-xl p-4 hover:border-blue-600 hover:bg-blue-50 cursor-pointer transition-all">
+                    <div class="text-xs font-bold text-slate-500 uppercase">Starter</div>
+                    <div class="text-2xl font-bold text-slate-900 my-2">₹400</div>
+                    <ul class="text-xs text-slate-600 space-y-2 mb-4">
+                        <li>• 1-3 Pages</li>
+                        <li>• Mobile Friendly</li>
+                        <li>• Basic Design</li>
+                    </ul>
+                    <button class="w-full py-2 bg-white border border-gray-300 rounded-lg text-xs font-bold">Select Basic</button>
+                </div>
+
+                <div onclick="selectPlan('Pro', 2500)" class="border-2 border-blue-600 relative rounded-xl p-4 hover:shadow-lg cursor-pointer transition-all bg-white transform md:-translate-y-2">
+                    <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-[10px] px-2 py-0.5 rounded-full">POPULAR</div>
+                    <div class="text-xs font-bold text-blue-600 uppercase">Growth</div>
+                    <div class="text-2xl font-bold text-slate-900 my-2">₹2,500</div>
+                    <ul class="text-xs text-slate-600 space-y-2 mb-4">
+                        <li>• 7 Pages</li>
+                        <li>• Animations</li>
+                        <li>• SEO Ready</li>
+                    </ul>
+                    <button class="w-full py-2 bg-blue-600 text-white rounded-lg text-xs font-bold">Select Pro</button>
+                </div>
+
+                <div onclick="selectPlan('Premium', 8000)" class="border border-gray-200 rounded-xl p-4 hover:border-purple-600 hover:bg-purple-50 cursor-pointer transition-all">
+                    <div class="text-xs font-bold text-slate-500 uppercase">Scale</div>
+                    <div class="text-2xl font-bold text-slate-900 my-2">₹8k+</div>
+                    <ul class="text-xs text-slate-600 space-y-2 mb-4">
+                        <li>• Custom DB</li>
+                        <li>• Google Auth</li>
+                        <li>• E-Commerce</li>
+                    </ul>
+                    <button class="w-full py-2 bg-white border border-gray-300 rounded-lg text-xs font-bold">Select Premium</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="nameModal" class="modal fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/80 backdrop-blur-sm p-4">
+        <div class="modal-content bg-white w-full max-w-sm rounded-2xl p-8 shadow-2xl relative text-center">
+            <button onclick="closeModals()" class="absolute top-4 right-4 text-slate-400 hover:text-red-500"><i class="ph ph-x text-xl"></i></button>
+            
+            <div class="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
+                <i class="ph-fill ph-whatsapp-logo"></i>
+            </div>
+            
+            <h3 class="text-xl font-bold mb-2">Final Step</h3>
+            <p class="text-slate-500 text-sm mb-6">Enter your name so we can create your Order Ticket.</p>
+            
+            <input type="text" id="userNameInput" placeholder="Your Name (e.g. Rahul)" class="w-full px-4 py-3 rounded-lg border border-gray-300 mb-4 focus:ring-2 focus:ring-green-500 focus:outline-none">
+            
+            <button onclick="finalizeWhatsApp()" class="w-full py-3 bg-green-600 text-white rounded-xl font-bold hover:bg-green-700 transition-all shadow-lg shadow-green-200">
+                Open WhatsApp <i class="ph-bold ph-arrow-right"></i>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Global State Variables
+        let selectedService = "";
+        let selectedPlan = "";
+        let selectedPrice = 0;
+        let orderID = "ORD-" + Math.floor(10000 + Math.random() * 90000);
+        
+        // Setup Order ID
+        document.getElementById('nav-order-id').innerText = orderID;
+
+        // --- Functions ---
+
+        // 1. Open Pricing Modal based on Category
+        function openServiceModal(serviceName) {
+            selectedService = serviceName;
+            document.getElementById('modalTitle').innerText = `${serviceName} Plans`;
+            document.getElementById('pricingModal').classList.add('active');
+        }
+
+        // 2. Select Plan and Open Name Modal
+        function selectPlan(planName, price) {
+            selectedPlan = planName;
+            selectedPrice = price;
+            // Hide Pricing Modal
+            document.getElementById('pricingModal').classList.remove('active');
+            
+            // Check if we already have a name from Google Login
+            if(window.currentUserValidName) {
+                document.getElementById('userNameInput').value = window.currentUserValidName;
+            }
+            
+            // Show Name Modal
+            document.getElementById('nameModal').classList.add('active');
+        }
+
+        // 3. Finalize and Redirect
+        function finalizeWhatsApp() {
+            const name = document.getElementById('userNameInput').value.trim();
+            if(!name) {
+                alert("Please enter your name to continue.");
+                return;
+            }
+
+            const phone = "916395211325";
+            
+            // Construct the detailed message
+            let message = `*Hello Shiven.shop!* 👋%0a`;
+            message += `I want to start a project.%0a%0a`;
+            message += `👤 *Name:* ${name}%0a`;
+            message += `🔖 *Order ID:* ${orderID}%0a`;
+            message += `🛠 *Service:* ${selectedService}%0a`;
+            message += `📊 *Plan:* ${selectedPlan} (approx ₹${selectedPrice})%0a%0a`;
+            message += `Please confirm my order and guide me on the next steps.`;
+
+            const url = `https://wa.me/${phone}?text=${message}`;
+            
+            window.open(url, '_blank');
+            closeModals();
+        }
+
+        function closeModals() {
+            document.getElementById('pricingModal').classList.remove('active');
+            document.getElementById('nameModal').classList.remove('active');
+        }
+    </script>
+</body>
+</html>
