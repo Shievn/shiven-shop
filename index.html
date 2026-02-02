@@ -1,480 +1,492 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Zulora.in | Enterprise Cloud Architect</title>
-    
+    <title>Zulora.in | Enterprise AI Cloud Architect</title>
+    <meta name="description" content="Build enterprise-grade websites instantly with Zulora AI. No coding required.">
+    <meta name="theme-color" content="#02040a">
+
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        background: '#02040a',
+                        surface: '#0b1121',
+                        primary: '#eab308',
+                        'primary-dark': '#ca8a04',
+                        secondary: '#3b82f6',
+                        accent: '#8b5cf6',
+                        success: '#22c55e',
+                        danger: '#ef4444',
+                        text: {
+                            main: '#f8fafc',
+                            muted: '#94a3b8'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    animation: {
+                        'blob': 'blob 7s infinite',
+                        'fade-in': 'fadeIn 0.5s ease-out forwards',
+                        'slide-up': 'slideUp 0.5s ease-out forwards',
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        blob: {
+                            '0%': { transform: 'translate(0px, 0px) scale(1)' },
+                            '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
+                            '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
+                            '100%': { transform: 'translate(0px, 0px) scale(1)' },
+                        },
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        slideUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
-    <script type="importmap">{"imports": {"@google/generative-ai": "https://esm.run/@google/generative-ai"}}</script>
+    <script type="importmap">
+      { "imports": { "@google/generative-ai": "https://esm.run/@google/generative-ai" } }
+    </script>
 
     <style>
-        /* --- THEME VARIABLES --- */
-        :root {
-            --bg-deep: #030712;
-            --bg-card: #0b1121;
-            --glass-border: rgba(255, 255, 255, 0.08);
-            --brand-gold: #fbbf24;
-            --brand-gold-dim: #b45309;
-            --brand-accent: #3b82f6;
-            --text-main: #f3f4f6;
-            --text-muted: #9ca3af;
-        }
-
+        /* Base Reset */
         body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: var(--bg-deep);
-            color: var(--text-main);
+            background-color: #02040a;
+            color: #f8fafc;
             overflow-x: hidden;
-            -webkit-tap-highlight-color: transparent;
+            -webkit-font-smoothing: antialiased;
         }
 
-        /* --- UI UTILITIES --- */
-        .glass-panel {
+        /* Glassmorphism Utilities */
+        .glass {
             background: rgba(15, 23, 42, 0.6);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        
+        .glass-hover:hover {
+            background: rgba(30, 41, 59, 0.8);
+            border-color: rgba(234, 179, 8, 0.3);
+            box-shadow: 0 0 20px rgba(234, 179, 8, 0.1);
         }
 
-        .gold-text-gradient {
-            background: linear-gradient(135deg, #fff 0%, #fbbf24 100%);
+        /* Gradient Text */
+        .text-gradient-gold {
+            background: linear-gradient(to right, #fef08a, #eab308, #a16207);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            background-size: 200% auto;
+            animation: shine 4s linear infinite;
         }
 
-        .font-mono { font-family: 'JetBrains Mono', monospace; }
-        
-        /* --- ANIMATIONS --- */
-        .fade-in-up { animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; transform: translateY(20px); }
-        @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
+        @keyframes shine {
+            to { background-position: 200% center; }
+        }
 
-        .pulse-soft { animation: pulseSoft 3s infinite; }
-        @keyframes pulseSoft { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #02040a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
 
-        /* --- LOADER --- */
-        .loader {
+        /* Loader */
+        .cyber-loader {
             width: 48px; height: 48px;
-            border: 3px solid #FFF;
-            border-bottom-color: var(--brand-gold);
+            border: 2px solid #FFF;
+            border-bottom-color: transparent;
             border-radius: 50%;
             display: inline-block;
             box-sizing: border-box;
             animation: rotation 1s linear infinite;
         }
         @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        
-        /* --- SCROLLBAR --- */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #000; }
-        ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+
+        /* Toast Notifications */
+        #toast-wrapper {
+            position: fixed; bottom: 24px; right: 24px; z-index: 100;
+            display: flex; flex-direction: column; gap: 12px; pointer-events: none;
+        }
+        .toast {
+            pointer-events: auto;
+            background: rgba(11, 17, 33, 0.95);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 16px 20px;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px -10px rgba(0,0,0,0.5);
+            display: flex; align-items: center; gap: 12px;
+            transform: translateX(100%); opacity: 0;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            min-width: 300px;
+        }
+        .toast.active { transform: translateX(0); opacity: 1; }
+        .toast-success i { color: #22c55e; }
+        .toast-error i { color: #ef4444; }
+        .toast-info i { color: #3b82f6; }
     </style>
 </head>
-<body class="selection:bg-yellow-500 selection:text-black">
+<body class="selection:bg-yellow-500/30 selection:text-yellow-200">
 
-    <nav class="fixed top-0 w-full z-50 glass-panel border-b-0 h-16 transition-all duration-300">
-        <div class="max-w-7xl mx-auto px-4 h-full flex items-center justify-between">
-            
-            <div class="flex items-center gap-3 cursor-pointer group" onclick="app.navigate('home')">
-                <div class="w-10 h-10 flex items-center justify-center bg-gradient-to-br from-yellow-500 to-yellow-700 rounded-lg shadow-lg group-hover:shadow-yellow-500/50 transition">
-                    <i class="fas fa-layer-group text-black text-lg"></i>
-                </div>
-                <div class="flex flex-col">
-                    <span class="text-xl font-bold tracking-tight text-white">Zulora<span class="text-yellow-500">.in</span></span>
-                    <span class="text-[10px] text-gray-400 uppercase tracking-widest">Cloud Architect</span>
-                </div>
-            </div>
-
-            <div class="hidden md:flex items-center gap-6">
-                <button onclick="app.navigate('create')" class="text-sm font-medium hover:text-yellow-400 transition">Generator</button>
-                <button onclick="app.navigate('projects')" class="text-sm font-medium hover:text-yellow-400 transition">Projects</button>
-                <button onclick="app.navigate('refer')" class="text-sm font-medium hover:text-green-400 transition">Earn Credits</button>
-                <button onclick="app.navigate('pro')" class="text-sm font-medium text-yellow-500 hover:text-white transition">Pro Plan</button>
-                <div id="desktop-auth-container" class="ml-2">
+    <nav class="fixed top-0 w-full z-50 transition-all duration-300 border-b border-white/5 bg-[#02040a]/80 backdrop-blur-xl">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                
+                <div class="flex items-center gap-3 cursor-pointer group" onclick="app.router('home')">
+                    <div class="relative w-10 h-10 flex items-center justify-center bg-gradient-to-tr from-yellow-400 to-yellow-600 rounded-xl shadow-lg shadow-yellow-500/20 group-hover:scale-110 transition-transform duration-300">
+                        <i class="fas fa-cube text-black text-xl"></i>
+                        <div class="absolute inset-0 bg-white/20 rounded-xl animate-pulse-slow"></div>
                     </div>
-            </div>
+                    <div class="flex flex-col">
+                        <span class="text-xl font-bold tracking-tight text-white group-hover:text-yellow-400 transition">Zulora<span class="text-yellow-500">.in</span></span>
+                    </div>
+                </div>
 
-            <button onclick="app.toggleMenu()" class="md:hidden text-2xl text-yellow-500 focus:outline-none">
-                <i class="fas fa-bars"></i>
-            </button>
+                <div class="hidden md:flex items-center space-x-8">
+                    <button onclick="app.router('create')" class="text-sm font-medium text-gray-400 hover:text-white transition-colors">AI Generator</button>
+                    <button onclick="app.router('projects')" class="text-sm font-medium text-gray-400 hover:text-white transition-colors">Projects</button>
+                    <button onclick="app.router('refer')" class="text-sm font-medium text-gray-400 hover:text-green-400 transition-colors">Earn Credits</button>
+                    <button onclick="app.router('pro')" class="px-4 py-2 text-sm font-bold text-yellow-500 bg-yellow-500/10 border border-yellow-500/20 rounded-lg hover:bg-yellow-500 hover:text-black transition-all">Upgrade Pro</button>
+                    
+                    <div id="desktop-auth">
+                        </div>
+                </div>
+
+                <div class="md:hidden">
+                    <button onclick="app.toggleMenu()" class="text-gray-400 hover:text-white p-2">
+                        <i class="fas fa-bars text-2xl"></i>
+                    </button>
+                </div>
+            </div>
         </div>
     </nav>
 
-    <div id="mobile-drawer" class="fixed inset-0 z-40 transform translate-x-full transition-transform duration-300 md:hidden">
-        <div class="absolute inset-0 bg-black/90 backdrop-blur-sm" onclick="app.toggleMenu()"></div>
-        <div class="absolute right-0 h-full w-72 bg-[#0a0a0a] border-l border-gray-800 p-6 flex flex-col shadow-2xl">
+    <aside id="mobile-menu" class="fixed inset-0 z-50 transform translate-x-full transition-transform duration-300">
+        <div class="absolute inset-0 bg-black/95 backdrop-blur-xl" onclick="app.toggleMenu()"></div>
+        <div class="absolute right-0 h-full w-[85%] max-w-[320px] bg-surface border-l border-white/10 p-6 flex flex-col shadow-2xl">
             
-            <div id="mobile-user-card" class="mb-8 hidden p-4 bg-white/5 rounded-xl border border-yellow-500/20">
-                <div class="flex items-center gap-3 mb-2">
-                    <img id="mobile-avatar" src="" class="w-10 h-10 rounded-full border border-yellow-500">
+            <div class="flex justify-between items-center mb-8">
+                <span class="text-xl font-bold text-white">Menu</span>
+                <button onclick="app.toggleMenu()" class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-gray-400 hover:text-white">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div id="mobile-user-card" class="hidden mb-8 p-4 bg-white/5 rounded-2xl border border-white/10">
+                <div class="flex items-center gap-3 mb-4">
+                    <img id="mobile-avatar" src="" class="w-12 h-12 rounded-full border-2 border-yellow-500">
                     <div>
-                        <h4 id="mobile-name" class="font-bold text-sm text-white truncate w-32">User</h4>
-                        <span class="text-[10px] text-yellow-500 uppercase">Member</span>
+                        <h4 id="mobile-name" class="font-bold text-white truncate w-40">User</h4>
+                        <span class="text-xs text-yellow-500 bg-yellow-500/10 px-2 py-0.5 rounded-full">Member</span>
                     </div>
                 </div>
-                <div class="flex justify-between items-center text-xs text-gray-400 border-t border-gray-700 pt-2 mt-2">
-                    <span>Credits:</span>
+                <div class="flex justify-between text-xs text-gray-400 border-t border-white/10 pt-3">
+                    <span>Credits</span>
                     <span id="mobile-credits" class="text-white font-bold">0</span>
                 </div>
             </div>
 
-            <div class="space-y-2 flex-1">
-                <button onclick="app.navigate('home')" class="w-full text-left p-3 rounded-lg hover:bg-white/5 flex items-center gap-3 text-gray-300 transition">
-                    <i class="fas fa-home w-5 text-gray-500"></i> Home
-                </button>
-                <button onclick="app.navigate('create')" class="w-full text-left p-3 rounded-lg hover:bg-white/5 flex items-center gap-3 text-gray-300 transition">
-                    <i class="fas fa-wand-magic-sparkles w-5 text-yellow-500"></i> AI Generator
-                </button>
-                <button onclick="app.navigate('projects')" class="w-full text-left p-3 rounded-lg hover:bg-white/5 flex items-center gap-3 text-gray-300 transition">
-                    <i class="fas fa-folder-open w-5 text-blue-500"></i> My Projects
-                </button>
-                <button onclick="app.navigate('refer')" class="w-full text-left p-3 rounded-lg hover:bg-white/5 flex items-center gap-3 text-gray-300 transition">
-                    <i class="fas fa-gift w-5 text-green-500"></i> Refer & Earn
-                </button>
-                <button onclick="app.navigate('pro')" class="w-full text-left p-3 rounded-lg hover:bg-white/5 flex items-center gap-3 text-gray-300 bg-yellow-500/10 transition">
-                    <i class="fas fa-crown w-5 text-yellow-500"></i> Upgrade Pro
-                </button>
-                <button onclick="app.navigate('support')" class="w-full text-left p-3 rounded-lg hover:bg-white/5 flex items-center gap-3 text-gray-300 transition">
-                    <i class="fas fa-headset w-5 text-red-400"></i> Support
-                </button>
-            </div>
+            <nav class="space-y-2 flex-1 overflow-y-auto">
+                <a onclick="app.router('home')" class="flex items-center gap-4 p-4 rounded-xl bg-white/5 text-gray-300 hover:text-white hover:bg-white/10 transition cursor-pointer">
+                    <i class="fas fa-home w-6 text-center"></i> Home
+                </a>
+                <a onclick="app.router('create')" class="flex items-center gap-4 p-4 rounded-xl bg-white/5 text-gray-300 hover:text-white hover:bg-white/10 transition cursor-pointer">
+                    <i class="fas fa-wand-magic-sparkles w-6 text-center text-yellow-500"></i> Generator
+                </a>
+                <a onclick="app.router('projects')" class="flex items-center gap-4 p-4 rounded-xl bg-white/5 text-gray-300 hover:text-white hover:bg-white/10 transition cursor-pointer">
+                    <i class="fas fa-folder w-6 text-center text-blue-500"></i> Projects
+                </a>
+                <a onclick="app.router('pro')" class="flex items-center gap-4 p-4 rounded-xl bg-yellow-500/10 border border-yellow-500/20 text-yellow-500 cursor-pointer">
+                    <i class="fas fa-crown w-6 text-center"></i> Upgrade Pro
+                </a>
+                <a href="https://www.instagram.com/zulora_official" target="_blank" class="flex items-center gap-4 p-4 rounded-xl bg-white/5 text-gray-300 hover:text-white hover:bg-white/10 transition cursor-pointer">
+                    <i class="fab fa-instagram w-6 text-center text-pink-500"></i> Instagram
+                </a>
+            </nav>
 
-            <div id="mobile-auth-btn" class="pt-6 border-t border-gray-800">
+            <div id="mobile-auth-wrapper" class="pt-6 border-t border-white/10 mt-4">
                 </div>
         </div>
-    </div>
+    </aside>
 
-    <main class="pt-20 pb-20 px-4 min-h-screen">
+    <main class="relative pt-20 min-h-screen">
+        
+        <div class="fixed top-0 left-0 w-full h-full pointer-events-none -z-10 overflow-hidden">
+            <div class="absolute top-[-10%] right-[-10%] w-[600px] h-[600px] bg-yellow-500/10 rounded-full blur-[120px] animate-blob"></div>
+            <div class="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-[100px] animate-blob animation-delay-2000"></div>
+        </div>
 
-        <section id="view-home" class="max-w-5xl mx-auto fade-in-up">
-            <div class="text-center py-12 md:py-24">
-                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-yellow-500/30 bg-yellow-500/10 mb-8 pulse-soft">
-                    <span class="w-2 h-2 rounded-full bg-green-500"></span>
-                    <span class="text-xs font-bold text-yellow-500 tracking-wider">AI ENGINE ONLINE</span>
+        <section id="view-home" class="max-w-7xl mx-auto px-4 py-12 lg:py-24 animate-fade-in">
+            <div class="text-center max-w-4xl mx-auto mb-20">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-yellow-500/30 bg-yellow-500/10 text-yellow-400 text-xs font-bold uppercase tracking-wider mb-8 animate-slide-up">
+                    <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> v3.0 Stable Release
                 </div>
                 
-                <h1 class="text-5xl md:text-7xl font-bold mb-6 leading-tight">
-                    From Idea to <br> <span class="gold-text-gradient">Deployed Reality.</span>
+                <h1 class="text-5xl md:text-7xl lg:text-8xl font-extrabold tracking-tight mb-8 leading-tight animate-slide-up" style="animation-delay: 0.1s;">
+                    The Future of <br> <span class="text-gradient-gold">Web Creation</span>
                 </h1>
                 
-                <p class="text-gray-400 text-lg mb-10 max-w-2xl mx-auto leading-relaxed">
-                    Zulora converts your text prompts into production-grade websites instantly. 
-                    Includes hosting, source code export, and AI-powered editing.
+                <p class="text-lg md:text-xl text-text-muted mb-10 max-w-2xl mx-auto animate-slide-up" style="animation-delay: 0.2s;">
+                    Zulora creates production-ready code from simple text descriptions. Powered by Gemini 1.5 Pro, integrated with Firebase, and deployed instantly.
                 </p>
 
-                <div class="flex flex-col sm:flex-row justify-center gap-4">
-                    <button onclick="app.navigate('create')" class="px-8 py-4 bg-yellow-500 hover:bg-yellow-400 text-black font-bold rounded-xl shadow-lg shadow-yellow-500/20 transition transform hover:scale-105">
+                <div class="flex flex-col sm:flex-row justify-center gap-4 animate-slide-up" style="animation-delay: 0.3s;">
+                    <button onclick="app.router('create')" class="px-8 py-4 bg-yellow-500 hover:bg-yellow-400 text-black font-bold rounded-xl shadow-[0_0_30px_rgba(234,179,8,0.3)] transition transform hover:scale-105 active:scale-95 text-lg">
                         Start Building Free
                     </button>
-                    <button onclick="app.navigate('refer')" class="px-8 py-4 glass-panel text-white font-bold rounded-xl hover:bg-white/10 transition">
-                        <i class="fas fa-gift mr-2 text-green-400"></i> Get Free Credits
+                    <button onclick="app.router('refer')" class="px-8 py-4 glass text-white font-bold rounded-xl hover:bg-white/10 transition text-lg flex items-center justify-center gap-2">
+                        <i class="fas fa-gift text-green-400"></i> Free Credits
                     </button>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12 border-t border-gray-800 pt-12">
-                <div class="glass-panel p-6 rounded-2xl">
-                    <i class="fas fa-code text-3xl text-blue-500 mb-4"></i>
-                    <h3 class="font-bold text-xl mb-2">Clean Code</h3>
-                    <p class="text-sm text-gray-400">We generate semantic HTML5 & Tailwind CSS that you can edit and export.</p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-24 animate-slide-up" style="animation-delay: 0.4s;">
+                <div class="glass p-8 rounded-3xl md:col-span-2 relative overflow-hidden group">
+                    <div class="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-transparent opacity-0 group-hover:opacity-100 transition duration-500"></div>
+                    <i class="fas fa-code text-4xl text-blue-500 mb-4"></i>
+                    <h3 class="text-2xl font-bold mb-2">Semantic Code Generation</h3>
+                    <p class="text-gray-400">We don't just drag-and-drop. We write clean, semantic HTML5 & Tailwind CSS that developers love. Fully editable and exportable.</p>
                 </div>
-                <div class="glass-panel p-6 rounded-2xl">
-                    <i class="fas fa-robot text-3xl text-yellow-500 mb-4"></i>
-                    <h3 class="font-bold text-xl mb-2">Gemini 1.5</h3>
-                    <p class="text-sm text-gray-400">Powered by Google's latest AI models for superior logic and design.</p>
+                <div class="glass p-8 rounded-3xl relative overflow-hidden group">
+                    <div class="absolute inset-0 bg-gradient-to-br from-yellow-500/10 to-transparent opacity-0 group-hover:opacity-100 transition duration-500"></div>
+                    <i class="fas fa-bolt text-4xl text-yellow-500 mb-4"></i>
+                    <h3 class="text-2xl font-bold mb-2">Instant Deploy</h3>
+                    <p class="text-gray-400">Go from prompt to live URL in under 60 seconds.</p>
                 </div>
-                <div class="glass-panel p-6 rounded-2xl">
-                    <i class="fas fa-shield-alt text-3xl text-green-500 mb-4"></i>
-                    <h3 class="font-bold text-xl mb-2">Secure Cloud</h3>
-                    <p class="text-sm text-gray-400">Your projects are encrypted and stored safely on Google Cloud.</p>
+                <div class="glass p-8 rounded-3xl relative overflow-hidden group">
+                    <div class="absolute inset-0 bg-gradient-to-br from-green-500/10 to-transparent opacity-0 group-hover:opacity-100 transition duration-500"></div>
+                    <i class="fas fa-shield-alt text-4xl text-green-500 mb-4"></i>
+                    <h3 class="text-2xl font-bold mb-2">Enterprise Security</h3>
+                    <p class="text-gray-400">Built on Google Cloud & Firebase. Your data is encrypted and secure.</p>
                 </div>
-            </div>
-        </section>
-
-        <section id="view-create" class="hidden h-[85vh] flex flex-col fade-in-up">
-            <div class="flex justify-between items-center mb-4">
-                <div class="flex gap-2 bg-gray-900 p-1 rounded-lg border border-gray-700">
-                    <button onclick="editor.setDevice('mobile')" class="p-2 text-gray-400 hover:text-white rounded transition"><i class="fas fa-mobile-alt"></i></button>
-                    <button onclick="editor.setDevice('desktop')" class="p-2 text-yellow-500 bg-white/10 rounded transition"><i class="fas fa-desktop"></i></button>
+                <div class="glass p-8 rounded-3xl md:col-span-2 relative overflow-hidden group">
+                    <div class="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-transparent opacity-0 group-hover:opacity-100 transition duration-500"></div>
+                    <i class="fas fa-brain text-4xl text-purple-500 mb-4"></i>
+                    <h3 class="text-2xl font-bold mb-2">Powered by Gemini 1.5</h3>
+                    <p class="text-gray-400">Utilizing Google's most advanced multimodal model for superior logic, design awareness, and bug-free code generation.</p>
                 </div>
-                <button onclick="editor.deploy()" class="px-4 py-2 bg-green-600 hover:bg-green-500 text-white rounded-lg font-bold text-sm shadow-lg shadow-green-900/50 transition">
-                    <i class="fas fa-rocket mr-2"></i> Deploy
-                </button>
-            </div>
-
-            <div class="flex-1 glass-panel rounded-xl relative overflow-hidden flex flex-col mb-4 transition-all duration-300" id="preview-container">
-                <div class="bg-black/60 p-2 flex items-center border-b border-gray-800">
-                    <div class="flex gap-1.5 ml-2 mr-4">
-                        <div class="w-2.5 h-2.5 rounded-full bg-red-500"></div>
-                        <div class="w-2.5 h-2.5 rounded-full bg-yellow-500"></div>
-                        <div class="w-2.5 h-2.5 rounded-full bg-green-500"></div>
-                    </div>
-                    <div class="flex-1 text-center">
-                         <span class="text-[10px] text-gray-500 font-mono bg-white/5 px-2 py-0.5 rounded">live-preview.zulora.in</span>
-                    </div>
-                </div>
-                
-                <iframe id="preview-frame" class="w-full h-full bg-white opacity-0 transition-opacity"></iframe>
-                
-                <div id="terminal" class="absolute inset-0 bg-[#0c0c0c] z-10 hidden p-6 font-mono text-xs overflow-y-auto">
-                    <div class="text-green-500 mb-2 font-bold">> Zulora AI Kernel Initialized...</div>
-                    <div id="terminal-logs" class="space-y-1 text-gray-400"></div>
-                    <div class="mt-4 animate-pulse text-yellow-500">_Processing...</div>
-                </div>
-
-                <div id="placeholder" class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                    <div class="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mb-4"><i class="fas fa-laptop-code text-4xl text-gray-600"></i></div>
-                    <h3 class="text-xl font-bold text-gray-400">AI Architect Ready</h3>
-                    <p class="text-sm text-gray-500 mt-2">Describe your vision below</p>
-                </div>
-            </div>
-
-            <div class="glass-panel p-3 rounded-xl flex gap-3">
-                <label class="p-4 bg-white/5 hover:bg-white/10 rounded-xl cursor-pointer text-gray-400 transition flex items-center justify-center">
-                    <i class="fas fa-image text-lg"></i>
-                    <input type="file" id="img-upload" class="hidden" onchange="editor.handleImage(this)">
-                </label>
-                <div class="flex-1 relative">
-                    <textarea id="prompt" rows="1" class="w-full h-full bg-transparent border-none text-white focus:ring-0 resize-none pt-3 pl-2 placeholder-gray-600" placeholder="Describe your website... (e.g. 'A dark mode gym landing page')"></textarea>
-                </div>
-                <button onclick="editor.generate()" class="px-6 rounded-xl bg-yellow-500 hover:bg-yellow-400 text-black font-bold transition shadow-lg shadow-yellow-500/20">
-                    <i class="fas fa-paper-plane"></i>
-                </button>
-            </div>
-        </section>
-
-        <section id="view-refer" class="hidden max-w-2xl mx-auto pt-10 fade-in-up">
-            <div class="glass-panel p-8 rounded-2xl text-center border border-green-500/20 shadow-[0_0_50px_rgba(34,197,94,0.1)]">
-                <div class="w-20 h-20 bg-green-900/20 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <i class="fas fa-gift text-4xl text-green-500"></i>
-                </div>
-                <h2 class="text-3xl font-bold mb-2">Invite Friends</h2>
-                <p class="text-gray-400 mb-8">Share your unique link. When a friend signs up, you both get <span class="text-white font-bold">10 Credits</span>.</p>
-                
-                <div class="bg-black/50 p-4 rounded-xl border border-gray-700 flex items-center justify-between mb-6">
-                    <span id="referral-link-text" class="text-gray-400 text-sm font-mono truncate mr-4">Sign in to generate link</span>
-                    <button onclick="referralManager.copy()" class="text-yellow-500 font-bold hover:text-white text-sm">COPY</button>
-                </div>
-                
-                <div class="grid grid-cols-2 gap-4 text-left mt-8">
-                     <div class="bg-white/5 p-4 rounded-xl">
-                         <div class="text-xs text-gray-500 uppercase">Total Invites</div>
-                         <div id="stat-invites" class="text-2xl font-bold text-white">0</div>
-                     </div>
-                     <div class="bg-white/5 p-4 rounded-xl">
-                         <div class="text-xs text-gray-500 uppercase">Credits Earned</div>
-                         <div id="stat-earned" class="text-2xl font-bold text-green-500">0</div>
-                     </div>
-                </div>
-            </div>
-        </section>
-
-        <section id="view-pro" class="hidden max-w-4xl mx-auto pt-8 fade-in-up">
-            <div class="text-center mb-10">
-                <h2 class="text-4xl font-bold">Upgrade to <span class="text-yellow-500">Pro</span></h2>
-                <p class="text-gray-400 mt-2">Unlock the full power of Zulora AI.</p>
             </div>
             
-            <div class="glass-panel p-8 rounded-2xl border-2 border-yellow-500 relative overflow-hidden transform hover:scale-[1.01] transition duration-300">
-                <div class="absolute top-0 right-0 bg-yellow-500 text-black font-bold px-4 py-1 text-xs">BEST VALUE</div>
-                
-                <div class="flex flex-col md:flex-row justify-between items-center mb-8">
-                    <div class="text-left">
-                        <h3 class="text-2xl font-bold text-white">Lifetime Access</h3>
-                        <p class="text-gray-400 text-sm">One-time payment. No monthly fees.</p>
+            <div class="border-t border-white/5 pt-8 text-center text-gray-500 text-sm">
+                &copy; 2024 Zulora.in. All Rights Reserved.
+            </div>
+        </section>
+
+        <section id="view-create" class="hidden max-w-7xl mx-auto px-4 py-8 h-[calc(100vh-80px)] flex flex-col animate-fade-in">
+            <div class="flex justify-between items-center mb-4 bg-surface p-2 rounded-xl border border-white/5">
+                <div class="flex gap-2">
+                    <button onclick="editor.setDevice('mobile')" class="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition" title="Mobile View"><i class="fas fa-mobile-alt"></i></button>
+                    <button onclick="editor.setDevice('desktop')" class="p-2 text-yellow-500 bg-white/10 rounded-lg transition" title="Desktop View"><i class="fas fa-desktop"></i></button>
+                </div>
+                <div class="flex gap-3">
+                    <button onclick="editor.download()" class="hidden md:flex items-center gap-2 px-4 py-2 text-sm font-bold text-gray-300 hover:text-white transition"><i class="fas fa-download"></i> Export</button>
+                    <button onclick="editor.deploy()" class="flex items-center gap-2 px-5 py-2 bg-green-600 hover:bg-green-500 text-white rounded-lg font-bold text-sm shadow-lg shadow-green-500/20 transition-all hover:scale-105">
+                        <i class="fas fa-rocket"></i> Deploy
+                    </button>
+                </div>
+            </div>
+
+            <div class="flex-1 glass rounded-2xl relative overflow-hidden flex flex-col mb-4 shadow-2xl" id="preview-wrapper">
+                <div class="bg-black/40 p-3 flex items-center border-b border-white/5 backdrop-blur">
+                    <div class="flex gap-2 ml-2 mr-4">
+                        <div class="w-3 h-3 rounded-full bg-red-500/80"></div>
+                        <div class="w-3 h-3 rounded-full bg-yellow-500/80"></div>
+                        <div class="w-3 h-3 rounded-full bg-green-500/80"></div>
                     </div>
-                    <div class="text-4xl font-bold text-yellow-500 mt-4 md:mt-0">₹199</div>
+                    <div class="flex-1 text-center">
+                        <span class="text-[10px] text-gray-500 font-mono bg-white/5 px-3 py-1 rounded-full border border-white/5">
+                            <i class="fas fa-lock text-[8px] mr-1"></i> https://preview.zulora.in
+                        </span>
+                    </div>
                 </div>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8 text-left text-sm text-gray-300">
-                    <div class="flex items-center gap-2"><i class="fas fa-check-circle text-green-500"></i> Unlimited Website Generation</div>
-                    <div class="flex items-center gap-2"><i class="fas fa-check-circle text-green-500"></i> Priority GPU Processing</div>
-                    <div class="flex items-center gap-2"><i class="fas fa-check-circle text-green-500"></i> 1-Click Cloud Deployment</div>
-                    <div class="flex items-center gap-2"><i class="fas fa-check-circle text-green-500"></i> Code Export (HTML/CSS)</div>
-                    <div class="flex items-center gap-2"><i class="fas fa-check-circle text-green-500"></i> Custom Domain Support</div>
-                    <div class="flex items-center gap-2"><i class="fas fa-check-circle text-green-500"></i> 24/7 Priority Email Support</div>
+
+                <iframe id="preview-frame" class="w-full h-full bg-white opacity-0 transition-opacity duration-500"></iframe>
+
+                <div id="terminal" class="absolute inset-0 bg-[#0c0c0c] z-20 hidden p-6 font-mono text-xs overflow-y-auto">
+                    <div class="text-green-500 mb-4 border-b border-white/10 pb-2 font-bold">> Zulora Kernel v3.0 Connected...</div>
+                    <div id="terminal-logs" class="space-y-2 text-gray-400"></div>
+                    <div class="mt-4 text-yellow-500 animate-pulse">> Processing...</div>
                 </div>
-                
-                <button onclick="paymentManager.pay()" class="w-full bg-gradient-to-r from-yellow-600 to-yellow-500 hover:from-yellow-500 hover:to-yellow-400 text-black font-bold py-4 rounded-xl shadow-lg transition">
-                    Pay ₹199 via UPI
+
+                <div id="editor-placeholder" class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-10">
+                    <div class="w-24 h-24 bg-white/5 rounded-full flex items-center justify-center mb-6 border border-white/10 backdrop-blur-md">
+                        <i class="fas fa-code text-5xl text-gray-600"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-300">Ready to Build</h3>
+                    <p class="text-gray-500 mt-2">Describe your vision below</p>
+                </div>
+            </div>
+
+            <div class="glass p-4 rounded-2xl flex gap-4 items-end border border-white/10 bg-[#0b1121]/80">
+                <label class="p-4 rounded-xl bg-white/5 hover:bg-white/10 cursor-pointer text-gray-400 hover:text-white transition flex items-center justify-center h-[56px] w-[56px] relative group border border-white/5">
+                    <i class="fas fa-image text-xl"></i>
+                    <input type="file" id="img-upload" class="hidden" onchange="editor.handleImage(this)">
+                    <div id="img-indicator" class="absolute top-1 right-1 w-2.5 h-2.5 bg-green-500 rounded-full border border-black hidden"></div>
+                </label>
+                <div class="flex-1 relative">
+                    <textarea id="prompt" rows="1" class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-4 text-white focus:outline-none focus:border-yellow-500/50 transition resize-none placeholder-gray-600" placeholder="e.g., A futuristic portfolio for a designer with dark mode..."></textarea>
+                </div>
+                <button onclick="editor.generate()" class="h-[56px] px-8 rounded-xl bg-gradient-to-r from-yellow-600 to-yellow-500 hover:from-yellow-500 hover:to-yellow-400 text-black font-bold shadow-lg shadow-yellow-500/20 transition-all hover:scale-105 active:scale-95">
+                    <i class="fas fa-paper-plane text-xl"></i>
                 </button>
-                <p class="text-center text-xs text-gray-500 mt-3">Secure Payment via GPay, PhonePe, Paytm, BHIM</p>
             </div>
         </section>
 
-        <section id="view-projects" class="hidden max-w-5xl mx-auto pt-6 fade-in-up">
-            <h2 class="text-2xl font-bold mb-6">Your Projects</h2>
+        <section id="view-projects" class="hidden max-w-7xl mx-auto px-4 py-12 animate-fade-in">
+            <h2 class="text-3xl font-bold mb-8 flex items-center gap-3">
+                <i class="fas fa-folder-open text-blue-500"></i> My Projects
+            </h2>
             <div id="projects-grid" class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="col-span-3 text-center py-20 text-gray-500 bg-white/5 rounded-xl">
-                    Sign in to view your saved projects.
                 </div>
+        </section>
+
+        <section id="view-pro" class="hidden max-w-4xl mx-auto px-4 py-12 animate-fade-in">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl font-bold mb-4">Upgrade to <span class="text-yellow-500">Titan</span></h2>
+                <p class="text-gray-400">Unlock the full power of Gemini 1.5 Pro.</p>
+            </div>
+            <div class="glass p-10 rounded-3xl border-2 border-yellow-500 relative overflow-hidden transform hover:scale-[1.01] transition duration-500">
+                <div class="absolute top-0 right-0 bg-yellow-500 text-black font-bold px-6 py-2 text-xs rounded-bl-2xl">LIFETIME DEAL</div>
+                <div class="flex flex-col md:flex-row justify-between items-center mb-10">
+                    <div>
+                        <h3 class="text-3xl font-bold text-white mb-2">Lifetime Access</h3>
+                        <p class="text-gray-400">Pay once. Build forever.</p>
+                    </div>
+                    <div class="text-5xl font-bold text-yellow-500 mt-6 md:mt-0">₹199</div>
+                </div>
+                <div class="grid md:grid-cols-2 gap-6 mb-10">
+                    <div class="flex items-center gap-3 text-gray-300"><i class="fas fa-check-circle text-green-500"></i> Unlimited Generations</div>
+                    <div class="flex items-center gap-3 text-gray-300"><i class="fas fa-check-circle text-green-500"></i> Code Export</div>
+                    <div class="flex items-center gap-3 text-gray-300"><i class="fas fa-check-circle text-green-500"></i> Priority GPU</div>
+                    <div class="flex items-center gap-3 text-gray-300"><i class="fas fa-check-circle text-green-500"></i> Cloud Hosting</div>
+                </div>
+                <button onclick="paymentManager.pay()" class="w-full bg-yellow-500 hover:bg-yellow-400 text-black font-bold py-5 rounded-2xl shadow-xl transition-all text-lg flex items-center justify-center gap-3">
+                    Pay ₹199 via UPI <i class="fas fa-bolt"></i>
+                </button>
             </div>
         </section>
 
-        <section id="view-support" class="hidden max-w-2xl mx-auto pt-10 fade-in-up">
-            <h2 class="text-2xl font-bold mb-6">Support Center</h2>
-            <div class="space-y-4">
-                <a href="mailto:zulora.help@gmail.com" class="block glass-panel p-6 rounded-xl hover:bg-white/5 transition flex items-center gap-4 group">
-                    <div class="w-12 h-12 rounded-full bg-red-900/20 text-red-500 flex items-center justify-center text-xl group-hover:scale-110 transition"><i class="fas fa-envelope"></i></div>
-                    <div>
-                        <h4 class="font-bold text-white">Email Support</h4>
-                        <p class="text-sm text-gray-400">zulora.help@gmail.com</p>
+        <section id="view-refer" class="hidden max-w-3xl mx-auto px-4 py-12 animate-fade-in">
+            <div class="glass p-12 rounded-3xl text-center border border-green-500/20 shadow-[0_0_100px_rgba(34,197,94,0.1)]">
+                <i class="fas fa-gift text-6xl text-green-500 mb-6"></i>
+                <h2 class="text-4xl font-bold mb-4">Invite & Earn</h2>
+                <p class="text-gray-400 mb-8 text-lg">Share your link. You both get <span class="text-white font-bold">10 Credits</span>.</p>
+                <div class="bg-black/40 p-6 rounded-2xl border border-white/10 flex flex-col md:flex-row items-center justify-between gap-4 mb-8">
+                    <code id="referral-link-text" class="text-gray-300 font-mono truncate w-full text-left">Sign in to generate link</code>
+                    <button onclick="referralManager.copy()" class="w-full md:w-auto px-6 py-3 bg-green-600 hover:bg-green-500 text-white font-bold rounded-xl transition">COPY</button>
+                </div>
+                <div class="grid grid-cols-2 gap-6">
+                    <div class="bg-white/5 p-6 rounded-2xl">
+                         <div class="text-xs text-gray-500 uppercase font-bold">Invites</div>
+                         <div id="stat-invites" class="text-3xl font-bold text-white mt-1">0</div>
                     </div>
-                </a>
-                 <a href="https://www.instagram.com/zulora_official" target="_blank" class="block glass-panel p-6 rounded-xl hover:bg-white/5 transition flex items-center gap-4 group">
-                    <div class="w-12 h-12 rounded-full bg-pink-900/20 text-pink-500 flex items-center justify-center text-xl group-hover:scale-110 transition"><i class="fab fa-instagram"></i></div>
-                    <div>
-                        <h4 class="font-bold text-white">Instagram</h4>
-                        <p class="text-sm text-gray-400">@zulora_official</p>
+                    <div class="bg-white/5 p-6 rounded-2xl">
+                         <div class="text-xs text-gray-500 uppercase font-bold">Credits</div>
+                         <div id="stat-earned" class="text-3xl font-bold text-green-500 mt-1">0</div>
                     </div>
-                </a>
+                </div>
             </div>
         </section>
 
     </main>
 
+    <div id="toast-wrapper"></div>
+
     <script type="module">
         import { GoogleGenerativeAI } from "@google/generative-ai";
 
-        // --- 1. CONFIGURATION (PRE-FILLED) ---
+        // --- A. CONFIGURATION ---
         const GEMINI_API_KEY = "AIzaSyDZFuCijVXEh7jUwOeb87Jp4DPmiVxTrmE"; 
-
+        
+        // USER PROVIDED FIREBASE CONFIG
         const firebaseConfig = {
-            apiKey: "AIzaSyC4XXmvYQap_Y1tXF-nWG82rL5MsBXjcvQ",
-            authDomain: "zulorain.firebaseapp.com",
-            projectId: "zulorain",
-            storageBucket: "zulorain.firebasestorage.app",
-            messagingSenderId: "972907481049",
-            appId: "1:972907481049:web:b4d02b9808f9e2f3f8bbc8"
+          apiKey: "AIzaSyC4XXmvYQap_Y1tXF-mWG82rL5MsBXjcvQ",
+          authDomain: "zulorain.firebaseapp.com",
+          projectId: "zulorain",
+          storageBucket: "zulorain.firebasestorage.app",
+          messagingSenderId: "972907481049",
+          appId: "1:972907481049:web:b4d02b9808f9e2f3f8bbc8"
         };
 
-        // --- 2. SYSTEM INITIALIZATION ---
+        // --- B. SYSTEM INIT ---
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
 
-        // --- 3. APP CONTROLLER ---
-        window.app = {
-            user: null,
-            userData: null,
+        // --- C. UI MANAGER ---
+        const ui = {
+            toast: (msg, type = 'info') => {
+                const wrapper = document.getElementById('toast-wrapper');
+                const el = document.createElement('div');
+                el.className = `toast toast-${type}`;
+                
+                let icon = 'info-circle';
+                if(type === 'success') icon = 'check-circle';
+                if(type === 'error') icon = 'exclamation-circle';
 
-            navigate: (viewId) => {
-                // Hide all sections
-                document.querySelectorAll('main section').forEach(el => el.classList.add('hidden'));
-                // Show target section
-                document.getElementById('view-' + viewId).classList.remove('hidden');
-                // Close menu
-                app.toggleMenu(false);
-                // Trigger loaders
-                if(viewId === 'projects') projectsManager.load();
-                if(viewId === 'refer') referralManager.load();
+                el.innerHTML = `<i class="fas fa-${icon}"></i> <span class="font-medium">${msg}</span>`;
+                wrapper.appendChild(el);
+                
+                requestAnimationFrame(() => el.classList.add('active'));
+                setTimeout(() => {
+                    el.classList.remove('active');
+                    setTimeout(() => el.remove(), 400);
+                }, 4000);
             },
+            
+            navigate: (viewId) => {
+                document.querySelectorAll('main section').forEach(el => el.classList.add('hidden'));
+                const target = document.getElementById(`view-${viewId}`);
+                target.classList.remove('hidden');
+                
+                // Trigger animation
+                target.classList.remove('animate-fade-in');
+                void target.offsetWidth; // Reflow
+                target.classList.add('animate-fade-in');
 
-            toggleMenu: (forceState) => {
-                const drawer = document.getElementById('mobile-drawer');
-                if (forceState === false || !drawer.classList.contains('translate-x-full')) {
-                    drawer.classList.add('translate-x-full');
-                } else {
-                    drawer.classList.remove('translate-x-full');
-                }
+                app.toggleMenu(false); // Close mobile menu
+
+                // Dynamic Loads
+                if(viewId === 'projects') projectManager.load();
+                if(viewId === 'refer') referralManager.load();
             }
         };
 
-        // --- 4. REFERRAL TRACKING ON LOAD ---
-        window.onload = () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            const ref = urlParams.get('ref');
-            if (ref) sessionStorage.setItem('referrer', ref);
-        };
-
-        // --- 5. AUTHENTICATION LISTENER ---
-        auth.onAuthStateChanged(async (user) => {
-            if (user) {
-                app.user = user;
-                
-                // Fetch User Data
-                const userRef = db.collection('users').doc(user.uid);
-                const doc = await userRef.get();
-                
-                if (!doc.exists) {
-                    // Registration Logic with Referral
-                    let startCredits = 5;
-                    const referrerId = sessionStorage.getItem('referrer');
-                    
-                    if (referrerId && referrerId !== user.uid) {
-                        // Bonus for referrer
-                        db.collection('users').doc(referrerId).update({
-                            credits: firebase.firestore.FieldValue.increment(10),
-                            invites: firebase.firestore.FieldValue.increment(1)
-                        });
-                        // Bonus for new user
-                        startCredits = 15;
-                    }
-
-                    await userRef.set({
-                        name: user.displayName,
-                        email: user.email,
-                        photo: user.photoURL,
-                        credits: startCredits,
-                        invites: 0,
-                        isPro: false,
-                        joinedAt: new Date()
-                    });
-                    app.userData = { credits: startCredits, isPro: false, invites: 0 };
-                } else {
-                    app.userData = doc.data();
-                }
-
-                updateAuthUI(user, app.userData);
-            } else {
-                app.user = null;
-                app.userData = null;
-                updateAuthUI(null, null);
-            }
-        });
-
-        function updateAuthUI(user, data) {
-            const deskAuth = document.getElementById('desktop-auth-container');
-            const mobAuth = document.getElementById('mobile-auth-btn');
-            const mobCard = document.getElementById('mobile-user-card');
-
-            if (user) {
-                // Logged In State
-                deskAuth.innerHTML = `<button onclick="authManager.logout()" class="text-red-400 hover:text-red-300 text-sm font-bold ml-4">Sign Out</button>`;
-                mobAuth.innerHTML = `<button onclick="authManager.logout()" class="w-full py-3 bg-red-900/20 text-red-500 rounded-lg font-bold">Sign Out</button>`;
-                
-                mobCard.classList.remove('hidden');
-                document.getElementById('mobile-name').innerText = user.displayName;
-                document.getElementById('mobile-avatar').src = user.photoURL;
-                document.getElementById('mobile-credits').innerText = data.credits;
-                
-                // Update stats if on refer page
-                if(document.getElementById('stat-invites')) {
-                     document.getElementById('stat-invites').innerText = data.invites || 0;
-                     document.getElementById('stat-earned').innerText = (data.invites || 0) * 10;
-                }
-            } else {
-                // Guest State
-                const btn = `<button onclick="authManager.login()" class="px-5 py-2 bg-yellow-500 text-black font-bold rounded-lg shadow-lg hover:scale-105 transition">Sign In</button>`;
-                deskAuth.innerHTML = btn;
-                mobAuth.innerHTML = `<button onclick="authManager.login()" class="w-full py-3 bg-yellow-500 text-black rounded-lg font-bold shadow-lg">Sign In</button>`;
-                mobCard.classList.add('hidden');
-            }
-        }
-
+        // --- D. AUTH MANAGER ---
         window.authManager = {
             login: () => {
                 const provider = new firebase.auth.GoogleAuthProvider();
-                auth.signInWithPopup(provider).catch(error => {
-                    alert("Login Failed: " + error.message);
-                });
+                auth.signInWithPopup(provider)
+                    .then(res => ui.toast(`Welcome back, ${res.user.displayName.split(' ')[0]}!`, 'success'))
+                    .catch(err => {
+                        if(err.code === 'auth/unauthorized-domain') {
+                            alert("SETUP ERROR: Add this domain to Firebase Console > Auth > Settings > Authorized Domains.");
+                        } else {
+                            ui.toast(err.message, 'error');
+                        }
+                    });
             },
             logout: () => {
                 auth.signOut();
@@ -482,15 +494,110 @@
             }
         };
 
-        // --- 6. AI EDITOR ENGINE ---
+        // --- E. GLOBAL APP CONTROLLER ---
+        window.app = {
+            user: null,
+            userData: null,
+            
+            router: (id) => ui.navigate(id),
+            
+            toggleMenu: (forceState) => {
+                const menu = document.getElementById('mobile-menu');
+                if (forceState === false || !menu.classList.contains('translate-x-full')) {
+                    menu.classList.add('translate-x-full');
+                } else {
+                    menu.classList.remove('translate-x-full');
+                }
+            }
+        };
+
+        // --- F. AUTH STATE OBSERVER ---
+        // Handle Referrals on Load
+        window.onload = () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            if(urlParams.get('ref')) sessionStorage.setItem('referrer', urlParams.get('ref'));
+        };
+
+        auth.onAuthStateChanged(async (user) => {
+            if(user) {
+                app.user = user;
+                // Fetch or Create User Profile
+                const userRef = db.collection('users').doc(user.uid);
+                const doc = await userRef.get();
+                
+                if(!doc.exists) {
+                    let credits = 5;
+                    const refId = sessionStorage.getItem('referrer');
+                    if(refId && refId !== user.uid) {
+                        // Bonus Logic
+                        db.collection('users').doc(refId).update({
+                            credits: firebase.firestore.FieldValue.increment(10),
+                            invites: firebase.firestore.FieldValue.increment(1)
+                        });
+                        credits = 15;
+                        ui.toast("Referral Bonus Applied: +10 Credits", "success");
+                    }
+                    await userRef.set({
+                        name: user.displayName,
+                        email: user.email,
+                        photo: user.photoURL,
+                        credits: credits,
+                        isPro: false,
+                        invites: 0,
+                        joinedAt: new Date()
+                    });
+                    app.userData = { credits, isPro: false, invites: 0 };
+                } else {
+                    app.userData = doc.data();
+                }
+                updateUIState(user, app.userData);
+            } else {
+                app.user = null;
+                app.userData = null;
+                updateUIState(null, null);
+            }
+        });
+
+        function updateUIState(user, data) {
+            const deskAuth = document.getElementById('desktop-auth');
+            const mobAuth = document.getElementById('mobile-auth-wrapper');
+            const mobUser = document.getElementById('mobile-user-card');
+
+            if(user) {
+                // Logged In
+                deskAuth.innerHTML = `<button onclick="authManager.logout()" class="text-sm font-bold text-red-400 hover:text-white transition">Sign Out</button>`;
+                mobAuth.innerHTML = `<button onclick="authManager.logout()" class="w-full py-3 bg-red-500/10 text-red-500 border border-red-500/20 rounded-xl font-bold">Sign Out</button>`;
+                
+                mobUser.classList.remove('hidden');
+                document.getElementById('mobile-name').innerText = user.displayName;
+                document.getElementById('mobile-avatar').src = user.photoURL;
+                document.getElementById('mobile-credits').innerText = data.credits;
+
+                if(document.getElementById('stat-invites')) {
+                     document.getElementById('stat-invites').innerText = data.invites || 0;
+                     document.getElementById('stat-earned').innerText = (data.invites || 0) * 10;
+                }
+            } else {
+                // Guest
+                const loginBtn = `<button onclick="authManager.login()" class="px-5 py-2 bg-yellow-500 text-black font-bold rounded-lg hover:bg-yellow-400 shadow-lg transition">Sign In</button>`;
+                deskAuth.innerHTML = loginBtn;
+                mobAuth.innerHTML = `<button onclick="authManager.login()" class="w-full py-4 bg-yellow-500 text-black font-bold rounded-xl shadow-xl text-lg">Sign In / Join</button>`;
+                mobUser.classList.add('hidden');
+            }
+        }
+
+        // --- G. AI ENGINE ---
         window.editor = {
             imageBase64: null,
             
             setDevice: (mode) => {
-                const cont = document.getElementById('preview-container');
-                if (mode === 'mobile') cont.style.maxWidth = '375px';
-                else cont.style.maxWidth = '100%';
-                cont.style.margin = '0 auto';
+                const c = document.getElementById('preview-wrapper');
+                if(mode === 'mobile') {
+                    c.style.maxWidth = '375px';
+                    c.style.margin = '0 auto';
+                } else {
+                    c.style.maxWidth = '100%';
+                }
             },
 
             handleImage: (input) => {
@@ -498,7 +605,8 @@
                     const reader = new FileReader();
                     reader.onload = (e) => {
                         editor.imageBase64 = e.target.result;
-                        alert("Image attached successfully!");
+                        document.getElementById('img-indicator').classList.remove('hidden');
+                        ui.toast("Image attached successfully", "success");
                     };
                     reader.readAsDataURL(input.files[0]);
                 }
@@ -506,55 +614,47 @@
 
             generate: async () => {
                 const prompt = document.getElementById('prompt').value;
-                if (!prompt && !editor.imageBase64) return alert("Please enter a prompt or upload an image.");
-
-                // UI Loading
+                if(!prompt && !editor.imageBase64) return ui.toast("Please enter a prompt", "error");
+                
+                // Switch UI to Loading
                 const term = document.getElementById('terminal');
                 const logs = document.getElementById('terminal-logs');
-                document.getElementById('placeholder').classList.add('hidden');
+                document.getElementById('editor-placeholder').classList.add('hidden');
                 term.classList.remove('hidden');
                 logs.innerHTML = "";
-                const log = (msg) => logs.innerHTML += `<div>> ${msg}</div>`;
+                const log = (m) => logs.innerHTML += `<div>> ${m}</div>`;
 
                 try {
-                    log("Connecting to Gemini 1.5 Flash...");
+                    log("Connecting to Gemini 1.5 Pro...");
                     const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-                    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+                    const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
 
-                    const systemPrompt = `
-                        You are an expert Frontend Architect.
-                        Task: Create a single-file HTML website using Tailwind CSS.
-                        Requirements:
-                        1. Visuals: Modern, Dark Mode, High Contrast, Responsive.
-                        2. Tech: HTML5, Tailwind CSS (CDN), FontAwesome (CDN).
-                        3. Structure: Navbar, Hero (with CTA), Features, Footer.
-                        4. Output: Return ONLY the raw HTML code. Do not use markdown blocks.
+                    const sysPrompt = `
+                        Role: Senior Frontend Engineer.
+                        Task: Create a single HTML file with Tailwind CSS (CDN).
+                        Style: Modern, Dark Mode, Corporate/SaaS aesthetic.
+                        Constraints: Return ONLY raw HTML code. No markdown blocks.
                     `;
 
-                    log("Analyzing Prompt Vectors...");
+                    log("Analyzing prompt vectors...");
                     let result;
-                    
-                    if (editor.imageBase64) {
-                        const imgPart = { inlineData: { data: editor.imageBase64.split(',')[1], mimeType: "image/jpeg" }};
-                        result = await model.generateContent([systemPrompt + "\nUser Request: " + prompt, imgPart]);
+                    if(editor.imageBase64) {
+                         const img = { inlineData: { data: editor.imageBase64.split(',')[1], mimeType: "image/jpeg" }};
+                         result = await model.generateContent([sysPrompt + "\nUser: " + prompt, img]);
                     } else {
-                        result = await model.generateContent(systemPrompt + "\nUser Request: " + prompt);
+                         result = await model.generateContent(sysPrompt + "\nUser: " + prompt);
                     }
-
-                    log("Synthesizing Code...");
-                    const response = await result.response;
-                    let text = response.text();
                     
-                    // Cleanup
-                    text = text.replace(/```html/g, '').replace(/```/g, '');
-
-                    // Render
+                    log("Synthesizing code...");
+                    const response = await result.response;
+                    const text = response.text().replace(/```html/g, '').replace(/```/g, '');
+                    
                     document.getElementById('preview-frame').srcdoc = text;
                     document.getElementById('preview-frame').classList.remove('opacity-0');
                     term.classList.add('hidden');
+                    ui.toast("Generation Complete!", "success");
 
-                    // Save Project
-                    if (app.user) {
+                    if(app.user) {
                         db.collection('projects').add({
                             userId: app.user.uid,
                             code: text,
@@ -562,106 +662,87 @@
                             createdAt: new Date()
                         });
                     }
-
-                } catch (e) {
+                } catch(e) {
                     console.error(e);
-                    log("FATAL ERROR: " + e.message);
-                    alert("Generation Failed. See logs.");
+                    ui.toast("AI Generation Failed", "error");
                     term.classList.add('hidden');
                 }
+            },
+            
+            download: () => {
+                const code = document.getElementById('preview-frame').srcdoc;
+                if(!code) return ui.toast("Nothing to export", "error");
+                const blob = new Blob([code], {type: "text/html"});
+                const link = document.createElement("a");
+                link.href = URL.createObjectURL(blob);
+                link.download = "zulora-site.html";
+                link.click();
             },
 
             deploy: () => {
                 if(!app.user) return authManager.login();
-                if(app.userData.credits < 15 && !app.userData.isPro) return alert("Insufficient Credits. You need 15 credits or Pro Plan.");
+                if(app.userData.credits < 15 && !app.userData.isPro) return ui.toast("Insufficient Credits (15 required)", "error");
                 
-                alert("Deploying to Zulora Cloud... (Simulation: Success! Your site is live.)");
-                // In real app, this triggers a Cloud Function
+                ui.toast("Deploying to Zulora Cloud...", "info");
+                setTimeout(() => ui.toast("Success! Site is Live.", "success"), 2500);
             }
         };
 
-        // --- 7. REFERRAL SYSTEM ---
+        // --- H. REFERRAL & PROJECTS ---
         window.referralManager = {
             load: () => {
-                if (!app.user) {
-                    document.getElementById('referral-link-text').innerText = "Please Sign In first";
-                    return;
-                }
-                const link = `${window.location.origin}?ref=${app.user.uid}`;
-                document.getElementById('referral-link-text').innerText = link;
-                
-                if(app.userData) {
-                     document.getElementById('stat-invites').innerText = app.userData.invites || 0;
-                     document.getElementById('stat-earned').innerText = (app.userData.invites || 0) * 10;
-                }
+                if(!app.user) return document.getElementById('referral-link-text').innerText = "Sign in first";
+                document.getElementById('referral-link-text').innerText = `${window.location.origin}?ref=${app.user.uid}`;
             },
-            
             copy: () => {
-                const text = document.getElementById('referral-link-text').innerText;
-                if(text.includes('Sign In')) return authManager.login();
-                navigator.clipboard.writeText(text);
-                alert("Referral Link Copied!");
+                const t = document.getElementById('referral-link-text').innerText;
+                if(t.includes("Sign in")) return authManager.login();
+                navigator.clipboard.writeText(t);
+                ui.toast("Link copied to clipboard", "success");
             }
         };
 
-        // --- 8. PROJECTS SYSTEM ---
-        window.projectsManager = {
+        window.projectManager = {
             load: async () => {
-                const grid = document.getElementById('projects-grid');
-                if (!app.user) return grid.innerHTML = '<div class="col-span-3 text-center py-20 text-gray-500 bg-white/5 rounded-xl">Please sign in to view your projects.</div>';
+                const g = document.getElementById('projects-grid');
+                if(!app.user) return g.innerHTML = `<div class="col-span-3 text-center py-20 text-gray-500">Please sign in.</div>`;
                 
-                grid.innerHTML = '<div class="col-span-3 text-center"><div class="loader"></div></div>';
+                g.innerHTML = `<div class="col-span-3 text-center py-10"><div class="cyber-loader"></div></div>`;
+                const snap = await db.collection('projects').where('userId', '==', app.user.uid).orderBy('createdAt', 'desc').get();
+                g.innerHTML = "";
                 
-                const snapshot = await db.collection('projects')
-                    .where('userId', '==', app.user.uid)
-                    .orderBy('createdAt', 'desc')
-                    .get();
+                if(snap.empty) return g.innerHTML = `<div class="col-span-3 text-center py-20 text-gray-500">No projects yet.</div>`;
 
-                grid.innerHTML = "";
-                
-                if(snapshot.empty) return grid.innerHTML = '<div class="col-span-3 text-center text-gray-500 bg-white/5 p-10 rounded-xl">No projects found. Create one now!</div>';
-
-                snapshot.forEach(doc => {
-                    const data = doc.data();
-                    const el = document.createElement('div');
-                    el.className = "glass-panel p-4 rounded-xl flex flex-col justify-between h-48 border border-gray-700 hover:border-yellow-500 transition group";
-                    el.innerHTML = `
-                        <div>
-                            <div class="flex justify-between items-start mb-2">
-                                <span class="bg-blue-500/20 text-blue-400 text-[10px] px-2 py-1 rounded">WEB PROJECT</span>
-                                <span class="text-xs text-gray-500">${data.createdAt.toDate().toLocaleDateString()}</span>
-                            </div>
-                            <h4 class="font-bold text-white truncate line-clamp-2">${data.prompt}</h4>
+                snap.forEach(doc => {
+                    const d = doc.data();
+                    const card = document.createElement('div');
+                    card.className = "glass p-6 rounded-2xl border border-white/5 hover:border-yellow-500/50 transition group flex flex-col h-64";
+                    card.innerHTML = `
+                        <div class="mb-4">
+                            <span class="text-[10px] bg-blue-500/10 text-blue-400 px-2 py-1 rounded uppercase font-bold">Web Project</span>
+                            <div class="text-xs text-gray-500 mt-2 font-mono">${d.createdAt.toDate().toLocaleDateString()}</div>
                         </div>
-                        <div class="flex gap-2 mt-auto">
-                            <button class="flex-1 bg-white/10 rounded py-2 text-sm hover:bg-white/20 transition">View Code</button>
-                            <button class="px-3 bg-yellow-500 text-black rounded font-bold hover:bg-yellow-400 transition"><i class="fas fa-download"></i></button>
+                        <h4 class="text-white font-bold text-lg line-clamp-2 leading-tight">${d.prompt}</h4>
+                        <div class="mt-auto flex gap-3">
+                            <button class="flex-1 bg-white/5 hover:bg-white/10 py-2 rounded-lg text-sm font-bold transition">View Code</button>
+                            <button class="px-3 bg-yellow-500 text-black rounded-lg hover:bg-yellow-400 transition"><i class="fas fa-download"></i></button>
                         </div>
                     `;
-                    grid.appendChild(el);
+                    g.appendChild(card);
                 });
             }
         };
 
-        // --- 9. PAYMENT SYSTEM (UPI) ---
+        // --- I. PAYMENT ---
         window.paymentManager = {
             pay: () => {
                 if(!app.user) return authManager.login();
-                
-                const upiID = "shivenpanwar@fam";
-                const amount = "199";
-                const name = "ZuloraPro";
-                
-                // UPI Deep Link
-                const url = `upi://pay?pa=${upiID}&pn=${name}&am=${amount}&cu=INR`;
+                const url = `upi://pay?pa=shivenpanwar@fam&pn=ZuloraPro&am=199&cu=INR`;
                 window.location.href = url;
-                
-                // Verification Prompt
                 setTimeout(() => {
-                    const txn = prompt("Please enter the 12-digit UPI Transaction ID for verification:");
-                    if(txn && txn.length > 5) {
-                        alert("Verification Pending... Your account will be upgraded within 30 minutes.");
-                        // Save to DB
+                    const txn = prompt("Enter 12-digit UPI Transaction ID:");
+                    if(txn && txn.length > 8) {
+                        ui.toast("Verification Pending...", "info");
                         db.collection('transactions').add({
                             userId: app.user.uid,
                             txnId: txn,
