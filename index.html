@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Zulora.in | AI Web Architect</title>
-    <meta name="description" content="Build enterprise-grade websites instantly with Zulora AI. Powered by Groq & Llama 3.">
+    <meta name="description" content="Generate production-ready websites instantly with Zulora AI. Powered by Groq LPU technology.">
     <meta name="theme-color" content="#02040a">
 
     <script src="https://cdn.tailwindcss.com"></script>
@@ -16,11 +16,15 @@
                     colors: {
                         background: '#02040a',
                         surface: '#0b1121',
-                        primary: '#fbbf24', /* Amber-400 */
+                        surfaceLight: '#1e293b',
+                        primary: '#eab308', /* Yellow 500 */
+                        primaryGlow: 'rgba(234, 179, 8, 0.5)',
                         secondary: '#3b82f6',
                         accent: '#8b5cf6',
                         success: '#10b981',
                         danger: '#ef4444',
+                        textMain: '#f8fafc',
+                        textMuted: '#94a3b8'
                     },
                     fontFamily: {
                         sans: ['Plus Jakarta Sans', 'sans-serif'],
@@ -31,6 +35,7 @@
                         'blob': 'blob 10s infinite',
                         'float': 'float 6s ease-in-out infinite',
                         'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'spin-slow': 'spin 3s linear infinite',
                     },
                     keyframes: {
                         blob: {
@@ -52,6 +57,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@300;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -59,7 +65,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
     <style>
-        /* Base Reset */
+        /* Core Reset */
         body {
             background-color: #02040a;
             color: #f8fafc;
@@ -70,8 +76,8 @@
         /* Glassmorphism */
         .glass {
             background: rgba(15, 23, 42, 0.65);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
             border: 1px solid rgba(255, 255, 255, 0.08);
         }
         
@@ -80,13 +86,19 @@
             border: 1px solid rgba(255, 255, 255, 0.08);
         }
 
+        .glass-hover:hover {
+            background: rgba(30, 41, 59, 0.8);
+            border-color: rgba(234, 179, 8, 0.3);
+            box-shadow: 0 0 30px rgba(234, 179, 8, 0.15);
+        }
+
         /* Gradient Text */
         .text-gradient-gold {
-            background: linear-gradient(135deg, #fef08a 0%, #fbbf24 50%, #b45309 100%);
+            background: linear-gradient(135deg, #fef08a 0%, #eab308 50%, #a16207 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-size: 200% auto;
-            animation: shine 5s linear infinite;
+            animation: shine 6s linear infinite;
         }
 
         @keyframes shine {
@@ -95,20 +107,20 @@
 
         /* Loaders */
         .loader-ring {
-            width: 24px; height: 24px;
-            border: 2px solid rgba(255, 255, 255, 0.1);
+            width: 48px; height: 48px;
+            border: 3px solid rgba(255, 255, 255, 0.1);
             border-radius: 50%;
-            border-top-color: #fbbf24;
+            border-top-color: #eab308;
             animation: spin 1s ease-in-out infinite;
         }
 
-        @keyframes spin { to { transform: rotate(360deg); } }
+        .typing-cursor::after {
+            content: '|';
+            animation: blink 1s step-start infinite;
+        }
 
-        /* Scrollbar */
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: #02040a; }
-        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+        @keyframes blink { 50% { opacity: 0; } }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
         /* Toast Notifications */
         #toast-container {
@@ -120,10 +132,11 @@
         .toast {
             pointer-events: auto;
             background: rgba(11, 17, 33, 0.95);
+            backdrop-filter: blur(10px);
             border: 1px solid rgba(255,255,255,0.1);
             border-left-width: 4px;
             padding: 16px 20px;
-            border-radius: 8px;
+            border-radius: 12px;
             color: white;
             font-size: 14px;
             display: flex; align-items: center; gap: 12px;
@@ -134,13 +147,15 @@
         }
 
         .toast.show { transform: translateX(0); opacity: 1; }
-        .toast-success { border-left-color: #22c55e; }
+        .toast-success { border-left-color: #10b981; }
         .toast-error { border-left-color: #ef4444; }
         .toast-info { border-left-color: #3b82f6; }
 
-        /* Mobile Optimization */
-        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #02040a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
     </style>
 </head>
 <body class="selection:bg-yellow-500/30 selection:text-yellow-200">
@@ -150,12 +165,15 @@
             <div class="flex items-center justify-between h-20">
                 
                 <div class="flex items-center gap-4 cursor-pointer group" onclick="app.router('home')">
-                    <div class="relative w-10 h-10 flex items-center justify-center bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-xl shadow-lg group-hover:scale-105 transition duration-300">
-                        <i class="fas fa-cube text-black text-xl"></i>
+                    <div class="relative w-10 h-10 flex items-center justify-center">
+                        <div class="absolute inset-0 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-xl blur opacity-40 group-hover:opacity-60 transition duration-300"></div>
+                        <div class="relative w-full h-full bg-[#0f172a] border border-white/10 rounded-xl flex items-center justify-center overflow-hidden">
+                            <i class="fas fa-layer-group text-yellow-500 text-lg"></i>
+                        </div>
                     </div>
                     <div class="flex flex-col">
                         <span class="text-xl font-bold tracking-tight text-white font-display">Zulora<span class="text-yellow-500">.in</span></span>
-                        <span class="text-[9px] text-gray-500 uppercase tracking-[0.25em]">AI Architect</span>
+                        <span class="text-[9px] text-gray-500 uppercase tracking-[0.25em]">Cloud Architect</span>
                     </div>
                 </div>
 
@@ -164,13 +182,15 @@
                         <i class="fas fa-wand-magic-sparkles text-yellow-500 group-hover:rotate-12 transition"></i> Generator
                     </button>
                     <button onclick="app.router('projects')" class="text-sm font-medium text-gray-400 hover:text-white transition">Projects</button>
-                    <button onclick="app.router('refer')" class="text-sm font-medium text-gray-400 hover:text-white transition">Rewards</button>
+                    <button onclick="app.router('refer')" class="text-sm font-medium text-gray-400 hover:text-white transition">Earn</button>
                     
                     <button onclick="app.router('pro')" class="group relative px-4 py-2 text-sm font-bold text-yellow-500 bg-yellow-500/5 border border-yellow-500/20 rounded-lg hover:bg-yellow-500 hover:text-black transition-all overflow-hidden">
                         <span class="relative z-10 flex items-center gap-2"><i class="fas fa-crown text-xs"></i> Upgrade</span>
+                        <div class="absolute inset-0 bg-yellow-500/20 blur-md opacity-0 group-hover:opacity-100 transition"></div>
                     </button>
                     
-                    <div id="desktop-auth-wrapper" class="pl-4 border-l border-white/10"></div>
+                    <div id="desktop-auth-wrapper" class="pl-4 border-l border-white/10">
+                        </div>
                 </div>
 
                 <div class="md:hidden">
@@ -186,7 +206,14 @@
         <div class="absolute inset-0 bg-black/95 backdrop-blur-xl" onclick="app.toggleMenu()"></div>
         <div class="absolute right-0 h-full w-[85%] max-w-[320px] bg-[#0b1121] border-l border-white/10 p-6 flex flex-col shadow-2xl">
             
-            <div id="mobile-user-card" class="hidden mb-8 p-4 bg-white/5 rounded-2xl border border-yellow-500/20">
+            <div class="flex justify-between items-center mb-8 pb-4 border-b border-white/10">
+                <span class="text-lg font-bold text-white font-display">Menu</span>
+                <button onclick="app.toggleMenu()" class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-gray-400 hover:text-white">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div id="mobile-user-card" class="hidden mb-8 p-4 bg-white/5 rounded-2xl border border-yellow-500/20 relative overflow-hidden">
                 <div class="flex items-center gap-3 mb-4">
                     <img id="mobile-avatar" src="" class="w-12 h-12 rounded-full border-2 border-yellow-500 object-cover">
                     <div>
@@ -194,18 +221,20 @@
                         <span class="text-[10px] uppercase tracking-wider text-yellow-500 bg-yellow-500/10 px-2 py-0.5 rounded-full">Pro Member</span>
                     </div>
                 </div>
-                <div class="flex justify-between text-xs text-gray-400 border-t border-white/10 pt-3">
+                <div class="flex justify-between text-xs text-gray-400 border-t border-white/10 pt-3 mt-2">
                     <span>Credits</span>
                     <span id="mobile-credits" class="text-white font-bold font-mono">0</span>
                 </div>
             </div>
 
-            <nav class="space-y-2 flex-1 overflow-y-auto hide-scrollbar">
-                <a onclick="app.router('home')" class="flex items-center gap-4 p-4 rounded-xl bg-white/5 text-gray-300 hover:text-white transition"><i class="fas fa-home w-5 text-center"></i> Home</a>
-                <a onclick="app.router('create')" class="flex items-center gap-4 p-4 rounded-xl bg-white/5 text-gray-300 hover:text-white transition"><i class="fas fa-wand-magic-sparkles w-5 text-center text-yellow-500"></i> Generator</a>
-                <a onclick="app.router('projects')" class="flex items-center gap-4 p-4 rounded-xl bg-white/5 text-gray-300 hover:text-white transition"><i class="fas fa-folder w-5 text-center text-blue-500"></i> Projects</a>
-                <a onclick="app.router('refer')" class="flex items-center gap-4 p-4 rounded-xl bg-white/5 text-gray-300 hover:text-white transition"><i class="fas fa-gift w-5 text-center text-green-500"></i> Referrals</a>
-                <a onclick="app.router('pro')" class="flex items-center gap-4 p-4 rounded-xl bg-yellow-500/10 border border-yellow-500/20 text-yellow-500 transition"><i class="fas fa-crown w-5 text-center"></i> Upgrade</a>
+            <nav class="space-y-2 flex-1 overflow-y-auto">
+                <a onclick="app.router('home')" class="flex items-center gap-4 p-4 rounded-xl bg-white/5 text-gray-300 hover:text-white hover:bg-white/10 transition cursor-pointer"><i class="fas fa-home w-5 text-center"></i> Home</a>
+                <a onclick="app.router('create')" class="flex items-center gap-4 p-4 rounded-xl bg-white/5 text-gray-300 hover:text-white hover:bg-white/10 transition cursor-pointer"><i class="fas fa-wand-magic-sparkles w-5 text-center text-yellow-500"></i> Generator</a>
+                <a onclick="app.router('projects')" class="flex items-center gap-4 p-4 rounded-xl bg-white/5 text-gray-300 hover:text-white hover:bg-white/10 transition cursor-pointer"><i class="fas fa-folder w-5 text-center text-blue-500"></i> Projects</a>
+                <a onclick="app.router('refer')" class="flex items-center gap-4 p-4 rounded-xl bg-white/5 text-gray-300 hover:text-white hover:bg-white/10 transition cursor-pointer"><i class="fas fa-gift w-5 text-center text-green-500"></i> Referrals</a>
+                <a onclick="app.router('pro')" class="flex items-center gap-4 p-4 rounded-xl bg-yellow-500/10 border border-yellow-500/20 text-yellow-500 cursor-pointer"><i class="fas fa-crown w-5 text-center"></i> Upgrade</a>
+                <a href="https://instagram.com/zulora_official" target="_blank" class="flex items-center gap-4 p-4 rounded-xl bg-white/5 text-gray-300 hover:text-white hover:bg-white/10 transition cursor-pointer"><i class="fab fa-instagram w-5 text-center text-pink-500"></i> Instagram</a>
+                <a href="mailto:zulora.help@gmail.com" class="flex items-center gap-4 p-4 rounded-xl bg-white/5 text-gray-300 hover:text-white hover:bg-white/10 transition cursor-pointer"><i class="fas fa-envelope w-5 text-center text-red-500"></i> Email Support</a>
             </nav>
 
             <div id="mobile-auth-wrapper" class="pt-6 border-t border-white/10 mt-4"></div>
@@ -222,7 +251,7 @@
         <section id="view-home" class="max-w-7xl mx-auto px-4 py-16 lg:py-24 animate-fade-in">
             <div class="text-center max-w-5xl mx-auto mb-20">
                 <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-yellow-500/30 bg-yellow-500/5 text-yellow-400 text-[10px] font-bold uppercase tracking-widest mb-8 backdrop-blur-sm">
-                    <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> v5.0 Stable (Groq Engine)
+                    <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> Groq Engine v6.0 Online
                 </div>
                 
                 <h1 class="text-5xl md:text-7xl lg:text-8xl font-extrabold tracking-tight mb-8 leading-tight font-display">
@@ -230,7 +259,7 @@
                 </h1>
                 
                 <p class="text-lg md:text-xl text-gray-400 mb-10 max-w-2xl mx-auto leading-relaxed">
-                    Zulora generates production-ready websites from text. Powered by Llama 3 via Groq for instant, error-free coding.
+                    Zulora generates production-ready websites from text instantly using the power of Llama 3.3 and Groq LPUs. No coding required.
                 </p>
 
                 <div class="flex flex-col sm:flex-row justify-center gap-5">
@@ -247,7 +276,7 @@
                 <div class="glass p-8 rounded-3xl md:col-span-2 relative overflow-hidden group border border-white/5">
                     <div class="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition duration-500"></div>
                     <div class="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center mb-6 text-blue-500"><i class="fas fa-code text-2xl"></i></div>
-                    <h3 class="text-2xl font-bold mb-2 text-white font-display">Groq LPU Inference</h3>
+                    <h3 class="text-2xl font-bold mb-2 text-white font-display">Llama 3.3 Code Engine</h3>
                     <p class="text-gray-400">We use the Llama 3 70B model running on Groq LPUs for lightning-fast code generation. It writes semantic HTML5 and Tailwind CSS.</p>
                 </div>
                 <div class="glass p-8 rounded-3xl relative overflow-hidden group border border-white/5">
@@ -289,11 +318,11 @@
 
                 <div id="terminal" class="absolute inset-0 bg-[#0c0c0c] z-20 hidden p-8 font-mono text-xs overflow-y-auto">
                     <div class="text-green-500 mb-4 border-b border-white/10 pb-2 font-bold text-sm">
-                        > Zulora Kernel v5.0 (Groq/Llama3) Connected...
+                        > Zulora Kernel v6.0 (Groq/Llama-3.3) Connected...
                     </div>
                     <div id="terminal-logs" class="space-y-2 text-gray-400"></div>
                     <div class="mt-6 flex items-center gap-2 text-yellow-500 animate-pulse">
-                        <span class="loader-ring w-4 h-4 border-2"></span> Processing...
+                        <span class="loader-ring w-4 h-4 border-2"></span> Generating...
                     </div>
                 </div>
 
@@ -308,7 +337,7 @@
 
             <div class="glass p-4 rounded-2xl flex gap-4 items-end border border-white/10 bg-[#0b1121]/90 backdrop-blur-xl">
                 <div class="flex-1 relative">
-                    <textarea id="prompt" rows="1" class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-4 text-white focus:outline-none focus:border-yellow-500/50 transition resize-none placeholder-gray-600 font-sans" placeholder="e.g., A gym website with dark mode, hero section, pricing, and contact form..."></textarea>
+                    <textarea id="prompt" rows="1" class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-4 text-white focus:outline-none focus:border-yellow-500/50 transition resize-none placeholder-gray-600 font-sans" placeholder="e.g., A gym website with dark mode, hero section, pricing table, and contact form..."></textarea>
                 </div>
                 <button onclick="editor.generate()" class="h-[56px] px-8 rounded-xl bg-gradient-to-r from-yellow-600 to-yellow-500 hover:from-yellow-500 hover:to-yellow-400 text-black font-bold shadow-lg shadow-yellow-500/20 transition-all hover:scale-105 active:scale-95 flex items-center gap-2">
                     <i class="fas fa-paper-plane text-xl"></i> <span class="hidden md:inline">Generate</span>
@@ -355,13 +384,29 @@
             </div>
         </section>
 
+        <section id="view-support" class="hidden max-w-2xl mx-auto px-4 py-12">
+            <h2 class="text-3xl font-bold mb-8 text-white font-display text-center">Support Center</h2>
+            <div class="grid gap-4">
+                <a href="mailto:zulora.help@gmail.com" class="glass p-6 rounded-2xl flex items-center gap-4 hover:bg-white/5 transition border border-white/10">
+                    <div class="w-12 h-12 bg-red-500/10 rounded-full flex items-center justify-center text-red-500"><i class="fas fa-envelope"></i></div>
+                    <div><h3 class="text-lg font-bold text-white">Email Support</h3><p class="text-gray-400 text-sm">zulora.help@gmail.com</p></div>
+                </a>
+                <a href="https://instagram.com/zulora_official" target="_blank" class="glass p-6 rounded-2xl flex items-center gap-4 hover:bg-white/5 transition border border-white/10">
+                    <div class="w-12 h-12 bg-pink-500/10 rounded-full flex items-center justify-center text-pink-500"><i class="fab fa-instagram"></i></div>
+                    <div><h3 class="text-lg font-bold text-white">Instagram</h3><p class="text-gray-400 text-sm">@zulora_official</p></div>
+                </a>
+            </div>
+        </section>
+
     </main>
 
     <div id="toast-container"></div>
 
     <script type="module">
-        // --- A. CONFIGURATION ---
-        const GROQ_API_KEY = "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"; // Your Groq Key
+        // ---------------------------------------------
+        // A. CONFIGURATION
+        // ---------------------------------------------
+        const GROQ_API_KEY = "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";
         
         const firebaseConfig = {
           apiKey: "AIzaSyC4XXmvYQap_Y1tXF-mWG82rL5MsBXjcvQ",
@@ -372,12 +417,16 @@
           appId: "1:972907481049:web:b4d02b9808f9e2f3f8bbc8"
         };
 
-        // --- B. INIT ---
+        // ---------------------------------------------
+        // B. INIT
+        // ---------------------------------------------
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
 
-        // --- C. UI CONTROLLER ---
+        // ---------------------------------------------
+        // C. UI CONTROLLER
+        // ---------------------------------------------
         const ui = {
             toast: (msg, type = 'info') => {
                 const container = document.getElementById('toast-container');
@@ -397,21 +446,28 @@
             }
         };
 
-        // --- D. AUTH ---
+        // ---------------------------------------------
+        // D. AUTH MANAGER
+        // ---------------------------------------------
         window.authManager = {
             login: () => {
                 const provider = new firebase.auth.GoogleAuthProvider();
                 auth.signInWithPopup(provider)
-                    .then(res => ui.toast(`Welcome, ${res.user.displayName}`, 'success'))
+                    .then(res => ui.toast(`Welcome back, ${res.user.displayName}`, 'success'))
                     .catch(err => {
-                        if(err.code === 'auth/unauthorized-domain') alert("Add this domain to Firebase Console > Auth > Settings.");
-                        else ui.toast(err.message, 'error');
+                        if(err.code === 'auth/unauthorized-domain') {
+                            alert("SECURITY ALERT:\n\nGo to Firebase Console > Authentication > Settings > Authorized Domains.\nAdd this website link.");
+                        } else {
+                            ui.toast(err.message, 'error');
+                        }
                     });
             },
             logout: () => auth.signOut().then(() => window.location.reload())
         };
 
-        // --- E. GLOBAL APP ---
+        // ---------------------------------------------
+        // E. APP CONTROLLER
+        // ---------------------------------------------
         window.app = {
             user: null,
             userData: null,
@@ -423,6 +479,9 @@
             }
         };
 
+        // ---------------------------------------------
+        // F. AUTH STATE
+        // ---------------------------------------------
         window.onload = () => {
             const urlParams = new URLSearchParams(window.location.search);
             if(urlParams.get('ref')) sessionStorage.setItem('referrer', urlParams.get('ref'));
@@ -437,11 +496,11 @@
                     let credits = 5;
                     const refId = sessionStorage.getItem('referrer');
                     if(refId && refId !== user.uid) {
-                        db.collection('users').doc(refId).update({ credits: firebase.firestore.FieldValue.increment(10), invites: firebase.firestore.FieldValue.increment(1) });
+                        db.collection('users').doc(refId).update({ credits: firebase.firestore.FieldValue.increment(10) });
                         credits = 15;
                     }
                     await userRef.set({ name: user.displayName, email: user.email, photo: user.photoURL, credits: credits, isPro: false, invites: 0, joinedAt: new Date() });
-                    app.userData = { credits, isPro: false, invites: 0 };
+                    app.userData = { credits, isPro: false };
                 } else {
                     app.userData = doc.data();
                 }
@@ -471,7 +530,9 @@
             }
         }
 
-        // --- F. GROQ AI ENGINE (UPDATED TO USE FETCH) ---
+        // ---------------------------------------------
+        // G. GROQ AI ENGINE (CRITICAL UPDATE)
+        // ---------------------------------------------
         window.editor = {
             setDevice: (mode) => {
                 const c = document.getElementById('preview-wrapper');
@@ -504,15 +565,16 @@
                             messages: [
                                 {
                                     role: "system",
-                                    content: "You are an expert Frontend Architect. Generate a SINGLE complete HTML file using Tailwind CSS via CDN. Make it modern, dark mode, responsive. Return ONLY raw HTML code. Do NOT use markdown backticks."
+                                    content: "You are an expert Frontend Architect. Generate a SINGLE complete HTML file using Tailwind CSS via CDN (script tag). Use FontAwesome 6 via CDN. The design must be modern, responsive, and follow the user's request precisely. Return ONLY raw HTML code. Do NOT use markdown backticks."
                                 },
                                 {
                                     role: "user",
                                     content: prompt
                                 }
                             ],
-                            model: "llama3-70b-8192", // Powerful coding model
-                            temperature: 0.1
+                            model: "llama-3.3-70b-versatile", // NEW STABLE MODEL
+                            temperature: 0.1,
+                            max_tokens: 8000
                         })
                     });
 
@@ -522,15 +584,15 @@
                     if(data.error) throw new Error(data.error.message);
 
                     let text = data.choices[0].message.content;
-                    // Cleanup markdown if AI adds it
+                    // Clean Markdown
                     text = text.replace(/```html/g, '').replace(/```/g, '');
 
                     document.getElementById('preview-frame').srcdoc = text;
                     document.getElementById('preview-frame').classList.remove('opacity-0');
                     term.classList.add('hidden');
-                    ui.toast("Website Generated!", "success");
+                    ui.toast("Website Generated Successfully!", "success");
 
-                    // Save to Firebase
+                    // Save
                     db.collection('projects').add({
                         userId: app.user.uid,
                         code: text,
@@ -551,7 +613,7 @@
                 const blob = new Blob([code], {type: "text/html"});
                 const link = document.createElement("a");
                 link.href = URL.createObjectURL(blob);
-                link.download = "zulora-site.html";
+                link.download = "zulora-website.html";
                 link.click();
             },
 
@@ -562,7 +624,9 @@
             }
         };
 
-        // --- G. PROJECTS & REFERRAL ---
+        // ---------------------------------------------
+        // H. PROJECTS
+        // ---------------------------------------------
         window.projectManager = {
             load: async () => {
                 const g = document.getElementById('projects-grid');
@@ -577,12 +641,15 @@
                         <div class="glass p-6 rounded-2xl border border-white/5 hover:border-yellow-500/50 transition flex flex-col h-64">
                             <h4 class="text-white font-bold text-lg line-clamp-2">${d.prompt}</h4>
                             <div class="text-xs text-gray-500 mt-2">${d.createdAt.toDate().toLocaleDateString()}</div>
-                            <div class="mt-auto"><button class="w-full bg-white/5 py-2 rounded text-sm hover:bg-white/10">View Code</button></div>
+                            <div class="mt-auto"><button class="w-full bg-white/5 py-2 rounded text-sm hover:bg-white/10 border border-white/5">View Code</button></div>
                         </div>`;
                 });
             }
         };
 
+        // ---------------------------------------------
+        // I. REFERRAL
+        // ---------------------------------------------
         window.referralManager = {
             load: () => {
                 if(!app.user) return document.getElementById('referral-link-text').innerText = "Please sign in";
@@ -596,7 +663,9 @@
             }
         };
 
-        // --- H. PAYMENT ---
+        // ---------------------------------------------
+        // J. PAYMENT
+        // ---------------------------------------------
         window.paymentManager = {
             pay: () => {
                 if(!app.user) return authManager.login();
